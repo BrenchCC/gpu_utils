@@ -7,8 +7,8 @@ def run_on_gpu(gpu_id):
     torch.cuda.set_device(gpu_id)
     while True:
         with torch.inference_mode():
-            a = torch.randn(50, 50, device=gpu_id)
-            b = torch.randn(50, 50, device=gpu_id)
+            a = torch.randn(10000, 10000, device=gpu_id)
+            b = torch.randn(10000, 10000, device=gpu_id)
             c = torch.matmul(a, b)
             d = torch.matmul(a, c)
             e = torch.matmul(d, b)
