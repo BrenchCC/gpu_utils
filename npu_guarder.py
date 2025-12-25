@@ -1,15 +1,41 @@
 # run this script after bash ```source /usr/local/Ascend/ascend-toolkit/set_env.sh```
+import os
 import torch
 import torch_npu
 
-# 检查 NPU 是否可用
-npu_available = torch.npu.is_available()
-print(f"NPU is available: {npu_available}")
+# 定义要在单个 NPU 上执行的函数
+def run_on_npu(npu_id):
+    # 设置当前 NPU 设备
+    torch.npu.set_device(npu_id)
+    
+    while True:
+        with torch.inference_mode():
+            # 在 NPU 上创建张量
+            a = torch.randn(50, 50, device=f'npu:{npu_id}')
+            b = torch.randn(50, 50, device=f'npu:{npu_id}')
+            c = torch.matmul(a, b)
+            d = torch.matmul(a, c)
+            e = torch.matmul(d, b)
+            #print(f"NPU {npu_id} result: {c}")
 
-
-# 在 NPU（或 CPU）上创建张量
-x = torch.randn([1000, 1000]).npu
-
-# 持续矩阵乘，加大 NPU 负载
-while True:
-    x = torch.matmul(x, x)
+if __name__ == "__main__":
+    import multiprocessing
+    
+    # 检查是否有可用的 NPU
+    if not torch.npu.is_available():
+        print("NPU is not available")
+        exit(1)
+    
+    # 获取 NPU 数量
+    num_npus = torch.npu.device_count()
+    print(f"Found {num_npus} NPU(s)")
+    
+    processes = []
+    for i in range(num_npus):
+        p = multiprocessing.Process(target=run_on_npu, args=(i,))
+        p.start()
+        processes.append(p)
+    
+    # 等待所有进程完成
+    for p in processes:
+        p.join()
