@@ -11,8 +11,8 @@ def run_on_npu(npu_id):
     while True:
         with torch.inference_mode():
             # 在 NPU 上创建张量
-            a = torch.randn(50, 50, device=f'npu:{npu_id}')
-            b = torch.randn(50, 50, device=f'npu:{npu_id}')
+            a = torch.randn(10000, 10000, device=f'npu:{npu_id}')
+            b = torch.randn(10000, 10000, device=f'npu:{npu_id}')
             c = torch.matmul(a, b)
             d = torch.matmul(a, c)
             e = torch.matmul(d, b)
